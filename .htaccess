@@ -1,0 +1,20 @@
+#####################
+# Dev atmoner.com
+# Fix rewriting urls
+#####################
+ModPagespeed off
+RewriteEngine On
+
+RewriteRule ^([^/]*)\.html$ /?page=$1 [QSA,L]
+RewriteRule ^([^-]*)-([^-]*)/$ /index.php?page=$1&act=$2 [QSA,L]
+RewriteRule ^([[:alnum:]]{8})/*$ /index.php?page=paste&id=$1 [QSA,L]
+
+
+
+
+ErrorDocument 401 /index.php?page=error&id=401
+ErrorDocument 403 /index.php?page=error&id=403
+ErrorDocument 404 /index.php?page=error&id=404
+
+SetOutputFilter SUBSTITUTE 
+Substitute s|head|bar|n

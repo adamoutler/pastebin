@@ -1,0 +1,15 @@
+copy the entire folder to your server
+apt-get install nodejs node npm cutycapt xvfb
+
+###Optional for apache2 but required for pictures to work
+a2enmod ext_filter
+copy the pastebin.conf to your /etc/apache2/sites-available
+cd /etc/apache2/sites-available
+a2ensite pastebin.conf
+###End apache2 portion
+
+edit the pastebin service in the scripts folder and change file locations
+copy the pastebin service to /etc/init.d
+update-rc.d pastebin defaults
+service pastebin start
+

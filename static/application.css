@@ -1,0 +1,203 @@
+html{
+	height:100%
+}
+
+body{
+	background:#000;
+	height:90%;
+	margin:0;
+	padding:1em
+}
+
+#content{
+	height:100%;
+	padding:0
+}
+
+textarea{
+	background:0 0;
+	border:0;
+	color:#0f0;
+	font-family:monospace;
+	font-size:1em;
+	height:100%;
+	outline:0;
+	padding:0;
+	resize:none;
+	width:100%
+}
+
+#code{
+	border:0;
+	font-size:1em;
+	margin:0;
+	outline:0;
+	padding:0 0 4em;
+	white-space:pre-wrap
+}
+
+#code code{
+	background:transparent!important;
+	padding:0
+}
+#code::-webkit-input-placeholder::before {
+    content: "1st line...\A2nd line...\A3rd line...";
+}
+pre{
+	counter-reset:line-numbering
+}
+
+pre .line::before{
+	color:#4c6a71;
+	content:counter(line-numbering);
+	counter-increment:line-numbering;
+	display:inline-block;
+	padding-right:1em;
+	text-align:right;
+	width:1.5em!important
+}
+
+#tools{
+	background:#004400;
+	bottom:0;
+	font-size:0;
+	left:0;
+	position:fixed;
+	width:100%
+}
+#tools :after{content:"woot";}
+#tools .function{
+	background:url(function-icons.png);
+	display:inline-block;
+	height:37px;
+	position:relative;
+	width:32px
+	
+}
+
+#tools .link embed{
+
+	vertical-align:top
+}
+
+#tools .function.enabled:hover{
+	cursor:pointer
+}
+
+#tools .function.save{
+	background-position:-5px top
+}
+
+#tools .function.enabled.save{
+
+	background-position:-5px center
+}
+
+#tools .function.enabled.save:hover{
+outline: #00FF00 dotted;
+	background-position:-5px bottom
+}
+
+#tools .function.new{
+	background-position:-42px top
+}
+
+#tools .function.enabled.new{
+	background-position:-42px center
+}
+
+#tools .function.enabled.new:hover{
+outline: #00FF00 dotted;
+	background-position:-42px bottom
+}
+
+#tools .function.duplicate{
+	background-position:-79px top
+}
+
+#tools .function.enabled.duplicate{
+	background-position:-79px center
+}
+
+#tools .function.enabled.duplicate:hover{
+outline: #00FF00 dotted;
+	background-position:-79px bottom
+}
+
+#tools .function.raw{
+	background-position:-116px top
+}
+
+#tools .function.enabled.raw{
+	background-position:-116px center
+}
+
+#tools .function.enabled.raw:hover{
+outline: #00FF00 dotted;
+	background-position:-116px bottom
+}
+
+#tools .function.twitter{
+	background-position:-153px top
+}
+#tools .function.gplus{
+	background-position:-183px top
+}
+
+#tools .function.enabled.twitter{
+	background-position:-153px center
+}
+#tools .function.enabled.gplus{
+	background-position:-183px center
+}
+#tools .function.enabled.twitter:hover{
+outline: #00FF00 dotted;
+	background-position:-153px bottom
+}
+#tools .function.enabled.gplus:hover{
+outline: #00FF00 dotted;
+	background-position:-183px bottom
+}
+.hljs{
+	display:block;
+	padding:.5em;
+	background:#002b36;
+	color:#839496
+}
+
+.diff .hljs-header,.hljs-comment,.hljs-doctype,.hljs-javadoc,.hljs-pi,.hljs-template_comment,.lisp .hljs-string{
+	color:#586e75
+}
+
+.css .hljs-tag,.hljs-addition,.hljs-keyword,.hljs-request,.hljs-status,.hljs-winutils,.method,.nginx .hljs-title{
+	color:#859900
+}
+
+.hljs-command,.hljs-hexcolor,.hljs-link_url,.hljs-number,.hljs-phpdoc,.hljs-regexp,.hljs-rules .hljs-value,.hljs-string,.hljs-tag .hljs-value,.tex .hljs-formula{
+	color:#2aa198
+}
+
+.css .hljs-function,.hljs-built_in,.hljs-chunk,.hljs-decorator,.hljs-id,.hljs-identifier,.hljs-localvars,.hljs-title,.vhdl .hljs-literal{
+	color:#268bd2
+}
+
+.haskell .hljs-type,.hljs-attribute,.hljs-class .hljs-title,.hljs-constant,.hljs-link_reference,.hljs-parent,.hljs-variable,.lisp .hljs-body,.smalltalk .hljs-number{
+	color:#b58900
+}
+
+.clojure .hljs-title,.css .hljs-pseudo,.diff .hljs-change,.hljs-attr_selector,.hljs-cdata,.hljs-header,.hljs-pragma,.hljs-preprocessor,.hljs-preprocessor .hljs-keyword,.hljs-shebang,.hljs-special,.hljs-subst,.hljs-symbol,.hljs-symbol .hljs-string{
+	color:#cb4b16
+}
+
+.hljs-deletion,.hljs-important{
+	color:#dc322f
+}
+
+.hljs-link_label{
+	color:#6c71c4
+}
+
+.tex .hljs-formula{
+	background:#073642
+}
+

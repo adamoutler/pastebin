@@ -1,0 +1,24 @@
+ModPagespeed off
+Options +Indexes
+<FilesMatch "\.(xml|txt|png|jpg|)$">
+Header set Cache-Control "max-age=604800, public, must-revalidate"
+</FilesMatch>
+<ifModule mod_headers.c>
+    Header set Connection keep-alive
+</ifModule>
+AddType application/x-httpd-php .html .htm
+AddHandler application/x-httpd-php .php
+AddHandler server-parsed .htm
+AddHandler server-parsed .html
+
+ModPagespeed off
+Substitute s/"copy"/substitution/
+
+SetOutputFilter SUBSTITUTE
+Substitute s/"page"/"bar"/in
+
+SetOutputFilter SUBSTITUTE;DEFLATE
+Substitute s|press"/substitution/
+
+SetOutputFilter SUBSTITUTE;DEFLATE
+Substitute s/"page"/"bar"/in
