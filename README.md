@@ -8,7 +8,8 @@ git clone https://github.com/adamoutler/pastebin.git
 cd pastebin
 docker build -t pastebin .
 docker run --name pastebin \
-  -v pastebin:/opt/pastebin/data \
+  -v pastebin-pastes:/opt/pastebin/data \
+  -v pastebin-images:/opt/pastebin/static/images \
   -p7777:7777 \
   -d pastebin
 
