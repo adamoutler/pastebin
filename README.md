@@ -2,6 +2,16 @@
 Hastebin Plus is an open-source Pastebin software written in node.js, which is easily installable in any network.  
 It bases upon [haste](https://github.com/seejohnrun/haste-server) and got enhanced in matters of **Design, Speed and Simplicity**.
 
+
+## Docker
+git clone https://github.com/adamoutler/pastebin.git
+cd pastebin
+docker build -t pastebin .
+docker run --name pastebin \
+  -v pastebin:/opt/pastebin/data \
+  -p7777:7777 \
+  -d pastebin
+
 ## Features
 * Paste code, logs and ... almost everything!
 * Syntax-Highlighting
