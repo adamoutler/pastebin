@@ -154,7 +154,12 @@ connect.createServer(
           
           if (data && typeof data === 'string') {
             var text = data.replace(/<[^>]*>?/gm, '').replace(/(\r\n|\n|\r)/gm, " ");
-            description = text.substring(0, 150).replace(/"/g, '&quot;').trim() || description;
+            if (text.length > 150) {
+              description = text.substring(0, 147).trim() + "...";
+            } else {
+              description = text.trim() || description;
+            }
+            description = description.replace(/"/g, '&quot;');
           }
           
           var protocol = request.headers['x-forwarded-proto'] || 'http';
