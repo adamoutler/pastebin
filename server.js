@@ -51,7 +51,8 @@ if (config.compressStaticAssets) {
       dest = item.substring(0, item.length - 4) + '.min' + item.substring(item.length - 4);
 console.log(item);
       var sourceFile = fs.readFileSync('./static/' + item, 'utf8');
-      fs.writeFileSync('./static/' + dest, new CleanCSS().minify(sourceFile), 'utf8');
+      var minifiedCss = new CleanCSS().minify(sourceFile).styles;
+      fs.writeFileSync('./static/' + dest, minifiedCss, 'utf8');
       winston.info('Compressed: ' + item + ' ==> ' + dest);
     }
   }
@@ -97,9 +98,25 @@ var documentHandler = new DocumentHandler({
 
 // Set the server up with a static cache
 connect.createServer(
+  // Middleware to intercept missing images and serve fallback
+  function(request, response, next) {
+    if (request.url.indexOf('/images/') === 0) {
+      console.log("Requested image middleware: " + request.url);
+      var file = __dirname + '/static' + request.url;
+      if (fs.existsSync(file)) {
+        console.log("Image exists, passing to static handler");
+        return next();
+      } else {
+        console.log("Image missing, serving fallback codeicon.png");
+        var fallback = __dirname + '/static/codeicon.png';
+        response.writeHead(200, { 'Content-Type': 'image/png' });
+        return fs.createReadStream(fallback).pipe(response);
+      }
+    }
+    next();
+  },
   // First look for api calls
   connectRoute(function(app) {
-
 
     // get raw documents
     app.get('/raw/:id', function(request, response, next) {
@@ -129,6 +146,25 @@ connect.createServer(
       console.log("connectroute");
     app.get('/:id', function(request, response, next) {
       console.log("id"+request.url);
+      var key = request.params.id;
+      if (key && key !== 'favicon.ico' && key !== 'index.html') {
+        preferredStore.get(key, function(data) {
+          var html = fs.readFileSync(__dirname + '/static/index.html', 'utf8');
+          var description = "You can modify and share this. Just press CTRL-D";
+          
+          if (data && typeof data === 'string') {
+            var text = data.replace(/<[^>]*>?/gm, '').replace(/(\r\n|\n|\r)/gm, " ");
+            description = text.substring(0, 150).replace(/"/g, '&quot;').trim() || description;
+          }
+          
+          html = html.replace(/content="codeicon\.png"/g, 'content="/images/' + key + '.png"');
+          html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, 'content="' + description + '"');
+          
+          response.writeHead(200, { 'Content-Type': 'text/html' });
+          response.end(html);
+        });
+        return;
+      }
       request.url = request.originalUrl = '/index.html';
 console.log(request.url);
       next();

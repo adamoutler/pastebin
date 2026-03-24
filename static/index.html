@@ -1,13 +1,22 @@
 <!doctype html>
 <html>
   <head>
- <span  itemscope itemtype="http://schema.org/Article">
-        <img itemprop="image" casual="woot" src="codeicon.png" height="0" width="0">
-        <title itemprop="name">adamoutler pastebin</title>
+        <title itemprop="name">HackedYour.info</title>
+        <meta name="description" itemprop="description" content="You can modify and share this. Just press CTRL-D">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta itemprop="description" content="You can modify and share this. Just press CTRL-D">
-        <meta itemprop="author" content="https://plus.google.com/111404109365540305851">
-        <a-rel="author" href="https://plus.google.com/111404109365540305851">AdamOutler</a>
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="HackedYour.info">
+        <meta property="og:description" content="You can modify and share this. Just press CTRL-D">
+        <meta property="og:image" itemprop="image" content="codeicon.png">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:title" content="HackedYour.info">
+        <meta property="twitter:description" content="You can modify and share this. Just press CTRL-D">
+        <meta property="twitter:image" content="codeicon.png">
+
         <link rel="stylesheet" type="text/css" href="application.min.css"/>
         <link rel="stylesheet" type="text/css" href="highlight.min.css"/>
 		
@@ -42,15 +51,12 @@
             <div class="duplicate function" title="Duplicate [Ctrl + D]"></div>
             <div class="raw function" title="Raw [Ctrl + Shift + R]"></div>
             <div class="twitter function" title="Tweet [Ctrl + Shift + T]"></div>
-            <div class="gplus" style="float:right"><g:plusone size="large" class="gplus"></g:plusone></div>
-
         </div>
         <div id="content">
             <pre id="code" style="display:none;" tabindex="0"><code></code></pre>
             <textarea  placeholder="Paste here, press Ctrl-s, then copy the page URL" spellcheck="false" style="display:none;"></textarea>
         </div>
     </body>
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
   <script src="activate-power-mode.js"></script>
   <script>
     POWERMODE.colorful = true; // make power mode colorful
