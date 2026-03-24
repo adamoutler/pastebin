@@ -157,7 +157,11 @@ connect.createServer(
             description = text.substring(0, 150).replace(/"/g, '&quot;').trim() || description;
           }
           
-          html = html.replace(/content="codeicon\.png"/g, 'content="/images/' + key + '.png"');
+          var protocol = request.headers['x-forwarded-proto'] || 'http';
+          var host = request.headers.host || 'pastebin.adamoutler.com';
+          var absoluteImageUrl = protocol + '://' + host + '/images/' + key + '.png';
+          
+          html = html.replace(/content="codeicon\.png"/g, 'content="' + absoluteImageUrl + '"');
           html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, 'content="' + description + '"');
           
           response.writeHead(200, { 'Content-Type': 'text/html' });
