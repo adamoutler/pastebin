@@ -98,6 +98,14 @@ var documentHandler = new DocumentHandler({
 
 // Set the server up with a static cache
 connect.createServer(
+  // Middleware to convert HEAD requests to GET so the router picks them up
+  function(request, response, next) {
+    if (request.method === 'HEAD') {
+      request.method = 'GET';
+      request.isHead = true;
+    }
+    next();
+  },
   // Middleware to intercept missing images and serve fallback
   function(request, response, next) {
     if (request.url.indexOf('/images/') === 0) {
@@ -144,7 +152,8 @@ connect.createServer(
   // Then we can loop back - and everything else should be a token, so route it back to /index.html
   connectRoute(function(app) {
       console.log("connectroute");
-    app.get('/:id', function(request, response, next) {
+      
+    var serveIndexWithMetadata = function(request, response, next) {
       console.log("id"+request.url);
       var key = request.params.id;
       if (key && key !== 'favicon.ico' && key !== 'index.html') {
@@ -165,19 +174,29 @@ connect.createServer(
           var protocol = request.headers['x-forwarded-proto'] || 'http';
           var host = request.headers.host || 'pastebin.adamoutler.com';
           var absoluteImageUrl = protocol + '://' + host + '/images/' + key + '.png';
+          var absolutePageUrl = protocol + '://' + host + '/' + key;
           
+          html = html.replace(/content="{{URL}}"/g, 'content="' + absolutePageUrl + '"');
           html = html.replace(/content="codeicon\.png"/g, 'content="' + absoluteImageUrl + '"');
           html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, 'content="' + description + '"');
           
           response.writeHead(200, { 'Content-Type': 'text/html' });
-          response.end(html);
+          if (request.method !== 'HEAD') {
+            response.write(html);
+          }
+          response.end();
         });
         return;
       }
       request.url = request.originalUrl = '/index.html';
 console.log(request.url);
       next();
-    });
+    };
+
+    app.get('/:id', serveIndexWithMetadata);
+    if (typeof app.head === 'function') {
+      app.head('/:id', serveIndexWithMetadata);
+    }
   }),
   connect.static(__dirname + '/static', { maxAge: config.staticMaxAge })
 ).listen(config.port, config.host);
