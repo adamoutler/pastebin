@@ -6,6 +6,7 @@ var fs = require('fs');
 var winston = require('winston');
 var connect = require('connect');
 var connectRoute = require("connect-route");
+var serveStatic = require('serve-static');
 
 var DocumentHandler = require('./lib/document_handler.js');
 
@@ -15,22 +16,17 @@ config.port = process.env.PORT || config.port || 8080;
 config.host = process.env.HOST || config.host || 'localhost';
 
 // Set up the logger
-var logging = [{
-	"level": "verbose",
-	"type": "Console",
-	"colorize": true
-	}];
-
-try {
-	winston.remove(winston.transports.Console);
-} catch(er) { }
-var detail, type;
-for (var i = 0; i < logging.length; i++) {
-    detail = logging[i];
-    type = detail.type;
-    delete detail.type;
-    winston.add(winston.transports[type], detail);
-}
+winston.configure({
+  transports: [
+    new winston.transports.Console({
+      level: 'verbose',
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  ]
+});
 winston.info("Welcome to Hastebin Plus!");
 
 // build the store from the config on-demand - so that we don't load it for statics
@@ -97,108 +93,111 @@ var documentHandler = new DocumentHandler({
 });
 
 // Set the server up with a static cache
-connect.createServer(
-  // Middleware to convert HEAD requests to GET so the router picks them up
-  function(request, response, next) {
-    if (request.method === 'HEAD') {
-      request.method = 'GET';
-      request.isHead = true;
-    }
-    next();
-  },
-  // Middleware to intercept missing images and serve fallback
-  function(request, response, next) {
-    if (request.url.indexOf('/images/') === 0) {
-      console.log("Requested image middleware: " + request.url);
-      var file = __dirname + '/static' + request.url;
-      if (fs.existsSync(file)) {
-        console.log("Image exists, passing to static handler");
-        return next();
-      } else {
-        console.log("Image missing, serving fallback codeicon.png");
-        var fallback = __dirname + '/static/codeicon.png';
-        response.writeHead(200, { 'Content-Type': 'image/png' });
-        return fs.createReadStream(fallback).pipe(response);
-      }
-    }
-    next();
-  },
-  // First look for api calls
-  connectRoute(function(app) {
+var app = connect();
 
-    // get raw documents
-    app.get('/raw/:id', function(request, response, next) {
-      console.log("raw");
-      return documentHandler.handleRawGet(request.params.id, response, !!config.documents[request.params.id]);
-    });
-    // add documents
-    app.post('/documents', function(request, response, next) {
-      console.log("documents");
-      return documentHandler.handlePost(request, response);
-    });
-    // get documents
-    app.get('/documents/:id', function(request, response, next) {
-            console.log("documents/id");
-      var skipExpire = !!config.documents[request.params.id];
-      return documentHandler.handleGet(request.params.id, response, skipExpire);
-    });
-  }),	 
-  // Otherwise, static
-  //connect.staticCache(),
+// Middleware to convert HEAD requests to GET so the router picks them up
+app.use(function(request, response, next) {
+  if (request.method === 'HEAD') {
+    request.method = 'GET';
+    request.isHead = true;
+  }
+  next();
+});
 
-  connect.static(__dirname + '/static', { 
-    maxAge: config.staticMaxAge 
-  }),
-  // Then we can loop back - and everything else should be a token, so route it back to /index.html
-  connectRoute(function(app) {
-      console.log("connectroute");
-      
-    var serveIndexWithMetadata = function(request, response, next) {
-      console.log("id"+request.url);
-      var key = request.params.id;
-      if (key && key !== 'favicon.ico' && key !== 'index.html') {
-        preferredStore.get(key, function(data) {
-          var html = fs.readFileSync(__dirname + '/static/index.html', 'utf8');
-          var description = "You can modify and share this. Just press CTRL-D";
-          
-          if (data && typeof data === 'string') {
-            var text = data.replace(/<[^>]*>?/gm, '').replace(/(\r\n|\n|\r)/gm, " ");
-            if (text.length > 150) {
-              description = text.substring(0, 147).trim() + "...";
-            } else {
-              description = text.trim() || description;
-            }
-            description = description.replace(/"/g, '&quot;');
+// Middleware to intercept missing images and serve fallback
+app.use(function(request, response, next) {
+  if (request.url.indexOf('/images/') === 0) {
+    console.log("Requested image middleware: " + request.url);
+    var file = __dirname + '/static' + request.url;
+    if (fs.existsSync(file)) {
+      console.log("Image exists, passing to static handler");
+      return next();
+    } else {
+      console.log("Image missing, serving fallback codeicon.png");
+      var fallback = __dirname + '/static/codeicon.png';
+      response.writeHead(200, { 'Content-Type': 'image/png' });
+      return fs.createReadStream(fallback).pipe(response);
+    }
+  }
+  next();
+});
+
+// First look for api calls
+app.use(connectRoute(function(router) {
+
+  // get raw documents
+  router.get('/raw/:id', function(request, response, next) {
+    console.log("raw");
+    return documentHandler.handleRawGet(request.params.id, response, !!config.documents[request.params.id]);
+  });
+  // add documents
+  router.post('/documents', function(request, response, next) {
+    console.log("documents");
+    return documentHandler.handlePost(request, response);
+  });
+  // get documents
+  router.get('/documents/:id', function(request, response, next) {
+          console.log("documents/id");
+    var skipExpire = !!config.documents[request.params.id];
+    return documentHandler.handleGet(request.params.id, response, skipExpire);
+  });
+}));
+
+// Otherwise, static
+app.use(serveStatic(__dirname + '/static', { 
+  maxAge: config.staticMaxAge 
+}));
+
+// Then we can loop back - and everything else should be a token, so route it back to /index.html
+app.use(connectRoute(function(router) {
+    console.log("connectroute");
+    
+  var serveIndexWithMetadata = function(request, response, next) {
+    console.log("id"+request.url);
+    var key = request.params.id;
+    if (key && key !== 'favicon.ico' && key !== 'index.html') {
+      preferredStore.get(key, function(data) {
+        var html = fs.readFileSync(__dirname + '/static/index.html', 'utf8');
+        var description = "You can modify and share this. Just press CTRL-D";
+        
+        if (data && typeof data === 'string') {
+          var text = data.replace(/<[^>]*>?/gm, '').replace(/(\r\n|\n|\r)/gm, " ");
+          if (text.length > 150) {
+            description = text.substring(0, 147).trim() + "...";
+          } else {
+            description = text.trim() || description;
           }
-          
-          var protocol = request.headers['x-forwarded-proto'] || 'http';
-          var host = request.headers.host || 'pastebin.adamoutler.com';
-          var absoluteImageUrl = protocol + '://' + host + '/images/' + key + '.png';
-          var absolutePageUrl = protocol + '://' + host + '/' + key;
-          
-          html = html.replace(/content="{{URL}}"/g, 'content="' + absolutePageUrl + '"');
-          html = html.replace(/content="codeicon\.png"/g, 'content="' + absoluteImageUrl + '"');
-          html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, 'content="' + description + '"');
-          
-          response.writeHead(200, { 'Content-Type': 'text/html' });
-          if (request.method !== 'HEAD') {
-            response.write(html);
-          }
-          response.end();
-        });
-        return;
-      }
-      request.url = request.originalUrl = '/index.html';
+          description = description.replace(/"/g, '&quot;');
+        }
+        
+        var protocol = request.headers['x-forwarded-proto'] || 'http';
+        var host = request.headers.host || 'pastebin.adamoutler.com';
+        var absoluteImageUrl = protocol + '://' + host + '/images/' + key + '.png';
+        var absolutePageUrl = protocol + '://' + host + '/' + key;
+        
+        html = html.replace(/content="{{URL}}"/g, 'content="' + absolutePageUrl + '"');
+        html = html.replace(/content="codeicon\.png"/g, 'content="' + absoluteImageUrl + '"');
+        html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, 'content="' + description + '"');
+        
+        response.writeHead(200, { 'Content-Type': 'text/html' });
+        if (request.method !== 'HEAD') {
+          response.write(html);
+        }
+        response.end();
+      });
+      return;
+    }
+    request.url = request.originalUrl = '/index.html';
 console.log(request.url);
-      next();
-    };
+    next();
+  };
 
-    app.get('/:id', serveIndexWithMetadata);
-    if (typeof app.head === 'function') {
-      app.head('/:id', serveIndexWithMetadata);
-    }
-  }),
-  connect.static(__dirname + '/static', { maxAge: config.staticMaxAge })
-).listen(config.port, config.host);
+  router.get('/:id', serveIndexWithMetadata);
+  if (typeof router.head === 'function') {
+    router.head('/:id', serveIndexWithMetadata);
+  }
+}));
+app.use(serveStatic(__dirname + '/static', { maxAge: config.staticMaxAge }));
+app.listen(config.port, config.host);
 
 winston.info('Done! Listening on ' + config.host + ':' + config.port);

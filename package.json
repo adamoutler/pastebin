@@ -19,10 +19,11 @@
   "main": "haste",
   "dependencies": {
     "clean-css": "4.1.11",
-    "connect": "2.14.0",
+    "connect": "^3.7.0",
     "connect-route": "0.1.4",
+    "serve-static": "^2.2.1",
     "uglify-js": "2.6.0",
-    "winston": "0.7.2"
+    "winston": "^3.19.0"
   },
   "engines": {
     "node": ">=0.10.25",
