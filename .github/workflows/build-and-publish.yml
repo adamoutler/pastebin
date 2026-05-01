@@ -75,9 +75,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Update Docker Hub Description
-        uses: peter-evans/dockerhub-description@v4
+        uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          readme-filepath: ./README.md
+          destination_container_repo: ${{ github.repository }}
+          provider: dockerhub
+          readme_file: 'README.md'
