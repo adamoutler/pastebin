@@ -76,6 +76,7 @@ jobs:
 
       - name: Update Docker Hub Description
         uses: christian-korneck/update-container-description-action@v1
+        continue-on-error: true
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_PASS: ${{ secrets.DOCKERHUB_TOKEN }}
