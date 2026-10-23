@@ -58,6 +58,33 @@ def test_add_and_retrieve_document():
     assert r2.status_code == 200
     assert r2.text == payload
 
+def test_social_metadata_tags_and_title_extraction():
+    # POST a markdown document with a clear header
+    payload = "# Custom Project Announcement\n\nDetailed release notes and architecture overview."
+    r = requests.post(f"{BASE_URL}/documents", data=payload)
+    assert r.status_code == 200
+    key = r.json()["key"]
+
+    html_res = requests.get(f"{BASE_URL}/{key}")
+    assert html_res.status_code == 200
+    text = html_res.text
+
+    # Title extraction
+    assert "Custom Project Announcement - HackedYour.info" in text
+    # Open Graph & Facebook / LinkedIn tags
+    assert '<meta property="og:type" content="article">' in text
+    assert '<meta property="og:site_name" content="HackedYour.info">' in text
+    assert f'<meta property="og:url" content="https://localhost:7777/{key}">' in text
+    assert f'<meta property="og:image" itemprop="image" content="https://localhost:7777/images/{key}.png">' in text
+    assert '<meta property="og:image:width" content="780">' in text
+    assert '<meta property="og:image:height" content="600">' in text
+    assert '<meta property="og:image:type" content="image/png">' in text
+    # Twitter / X tags
+    assert '<meta name="twitter:card" content="summary_large_image">' in text
+    assert '<meta name="twitter:site" content="@adamoutler">' in text
+    assert '<meta name="twitter:creator" content="@adamoutler">' in text
+    assert f'<meta name="twitter:image" content="https://localhost:7777/images/{key}.png">' in text
+
 def test_meta_tag_injection_prevention():
     # Attempt $' replacement pattern and attribute breakout in paste description
     hostile_paste = "# Markdown Title\n\n$'\" onload=\"alert(1)\"><script>alert(1)</script>"

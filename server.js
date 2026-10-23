@@ -177,30 +177,61 @@ app.use(connectRoute(function(router) {
   var serveIndexWithMetadata = function(request, response, next) {
     console.log("id"+request.url);
     var key = request.params.id;
+    var protocol = request.headers['x-forwarded-proto'] || 'https';
+    var host = request.headers.host || 'hackedyour.info';
+
     if (key && key !== 'favicon.ico' && key !== 'index.html') {
       preferredStore.get(key, function(data) {
         var html = fs.readFileSync(__dirname + '/static/index.html', 'utf8');
         var description = "You can modify and share this. Just press CTRL-D";
+        var title = "HackedYour.info";
         
         if (data && typeof data === 'string') {
+          var lines = data.split(/\r?\n/);
+          for (var li = 0; li < lines.length; li++) {
+            var rawLine = lines[li].replace(/^\s+|\s+$/g, '');
+            if (!rawLine) continue;
+            var headingMatch = rawLine.match(/^#{1,6}\s+(.+)$/);
+            if (headingMatch) {
+              title = headingMatch[1].replace(/<[^>]*>?/gm, '').replace(/[`*_~]/g, '').trim();
+              if (title.length > 70) {
+                title = title.substring(0, 67).trim() + "...";
+              }
+              break;
+            }
+          }
+
           var text = data.replace(/<[^>]*>?/gm, '').replace(/(\r\n|\n|\r)/gm, " ");
-          if (text.length > 150) {
-            description = text.substring(0, 147).trim() + "...";
+          if (text.length > 200) {
+            description = text.substring(0, 197).trim() + "...";
           } else {
             description = text.trim() || description;
           }
         }
         
-        var protocol = request.headers['x-forwarded-proto'] || 'http';
-        var host = request.headers.host || 'pastebin.adamoutler.com';
         var safeKey = encodeURIComponent(key);
         var absoluteImageUrl = escapeHtmlAttr(protocol + '://' + host + '/images/' + safeKey + '.png');
         var absolutePageUrl = escapeHtmlAttr(protocol + '://' + host + '/' + safeKey);
         var safeDescription = escapeHtmlAttr(description);
+        var safeTitle = escapeHtmlAttr(title !== "HackedYour.info" ? title + " - HackedYour.info" : "HackedYour.info - " + key);
         
-        html = html.replace(/content="\{\{URL\}\}"/g, function() { return 'content="' + absolutePageUrl + '"'; });
-        html = html.replace(/content="codeicon\.png"/g, function() { return 'content="' + absoluteImageUrl + '"'; });
-        html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, function() { return 'content="' + safeDescription + '"'; });
+        html = html.replace(/<title itemprop="name">[^<]*<\/title>/, function() {
+          return '<title itemprop="name">' + safeTitle + '</title>';
+        });
+        html = html.replace(/content="\{\{TITLE\}\}"/g, function() {
+          return 'content="' + safeTitle + '"';
+        });
+        html = html.replace(/content="\{\{URL\}\}"/g, function() {
+          return 'content="' + absolutePageUrl + '"';
+        }).replace(/href="\{\{URL\}\}"/g, function() {
+          return 'href="' + absolutePageUrl + '"';
+        });
+        html = html.replace(/content="codeicon\.png"/g, function() {
+          return 'content="' + absoluteImageUrl + '"';
+        });
+        html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, function() {
+          return 'content="' + safeDescription + '"';
+        });
         
         response.writeHead(200, { 'Content-Type': 'text/html' });
         if (request.method !== 'HEAD') {
@@ -210,9 +241,20 @@ app.use(connectRoute(function(router) {
       });
       return;
     }
-    request.url = request.originalUrl = '/index.html';
-console.log(request.url);
-    next();
+
+    var defaultUrl = escapeHtmlAttr(protocol + '://' + host + '/');
+    var defaultImageUrl = escapeHtmlAttr(protocol + '://' + host + '/codeicon.png');
+    var rootHtml = fs.readFileSync(__dirname + '/static/index.html', 'utf8')
+      .replace(/content="\{\{TITLE\}\}"/g, 'content="HackedYour.info"')
+      .replace(/content="\{\{URL\}\}"/g, 'content="' + defaultUrl + '"')
+      .replace(/href="\{\{URL\}\}"/g, 'href="' + defaultUrl + '"')
+      .replace(/content="codeicon\.png"/g, 'content="' + defaultImageUrl + '"');
+
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    if (request.method !== 'HEAD') {
+      response.write(rootHtml);
+    }
+    response.end();
   };
 
   router.get('/:id', serveIndexWithMetadata);
