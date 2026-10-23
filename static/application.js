@@ -6,16 +6,14 @@ var haste = function() {
   this.$box = $('#code');
   this.$code = $('#code code');
   this.$markdown = $('#markdown');
-  this.$modeBar = $('#mode-bar');
-  this.$modeLabel = $('#mode-label');
-  this.$btnPrimary = $('#btn-mode-primary');
-  this.$btnSecondary = $('#btn-mode-secondary');
-  this.$btnCopyRaw = $('#btn-copy-raw');
+  this.$writeBar = $('#write-bar');
+  this.$btnWriteEdit = $('#btn-write-edit');
+  this.$btnWritePreview = $('#btn-write-preview');
   this.mode = 'writing';
   this.subMode = 'write';
   this.configureShortcuts();
   this.configureButtons();
-  this.configureModeBar();
+  this.configureWriteBar();
 
   if (!this.twitter) {
     $('#tools .twitter').hide();
@@ -53,32 +51,15 @@ haste.prototype.configureKey = function(enable) {
   });
 };
 
-// Update the Writing Mode indicator badge based on live textarea content
-haste.prototype.updateWritingBadge = function() {
-  if (this.mode !== 'writing') {
-    return;
-  }
-  var val = this.$textarea.val() || '';
-  var detected = window.haste_markdown && window.haste_markdown.detect(val).isMarkdown;
-  if (detected) {
-    this.$modeLabel.text('WRITING MODE (MD)').addClass('md-detected');
-  } else {
-    this.$modeLabel.text('WRITING MODE').removeClass('md-detected');
-  }
-};
-
 // Switch between 'write' and 'preview' inside Writing Mode
 haste.prototype.setWriteSubMode = function(subMode) {
   this.mode = 'writing';
   this.subMode = subMode;
-  this.$btnPrimary.text('Write');
-  this.$btnSecondary.text('Preview');
-  this.$btnCopyRaw.hide();
-  this.updateWritingBadge();
+  this.$writeBar.show();
 
   if (subMode === 'preview') {
-    this.$btnPrimary.removeClass('active');
-    this.$btnSecondary.addClass('active');
+    this.$btnWriteEdit.removeClass('active');
+    this.$btnWritePreview.addClass('active');
     $('#tools .function.markdown').addClass('active-view');
     var rawText = this.$textarea.val() || '';
     if (window.haste_markdown && this.$markdown.length) {
@@ -88,8 +69,8 @@ haste.prototype.setWriteSubMode = function(subMode) {
     this.$box.hide();
     this.$markdown.show().focus();
   } else {
-    this.$btnPrimary.addClass('active');
-    this.$btnSecondary.removeClass('active');
+    this.$btnWriteEdit.addClass('active');
+    this.$btnWritePreview.removeClass('active');
     $('#tools .function.markdown').removeClass('active-view');
     this.$markdown.hide();
     this.$box.hide();
@@ -97,25 +78,14 @@ haste.prototype.setWriteSubMode = function(subMode) {
   }
 };
 
-// Switch between 'markdown' (Rendered) and 'code' (Code / Raw) inside Reading Mode
+// Switch between 'markdown' and 'plain' on the normal Reading screen (no top bar)
 haste.prototype.setReadSubMode = function(subMode) {
   this.mode = 'reading';
   this.subMode = subMode;
-  this.$btnPrimary.text('Rendered');
-  this.$btnSecondary.text('Code / Raw');
-  this.$btnCopyRaw.show();
-
-  if (this.doc && this.doc.isMarkdown) {
-    this.$modeLabel.text('READING MODE (MD)').addClass('md-detected');
-  } else {
-    this.$modeLabel.text('READING MODE').removeClass('md-detected');
-  }
-
+  this.$writeBar.hide();
   this.$textarea.hide();
 
   if (subMode === 'markdown') {
-    this.$btnPrimary.addClass('active');
-    this.$btnSecondary.removeClass('active');
     $('#tools .function.markdown').addClass('active-view');
     if (window.haste_markdown && this.$markdown.length && this.doc) {
       window.haste_markdown.render(this.doc.data || '', this.$markdown[0]);
@@ -123,8 +93,6 @@ haste.prototype.setReadSubMode = function(subMode) {
     this.$box.hide();
     this.$markdown.show().focus();
   } else {
-    this.$btnPrimary.removeClass('active');
-    this.$btnSecondary.addClass('active');
     $('#tools .function.markdown').removeClass('active-view');
     this.$markdown.hide();
     this.$box.show().focus();
@@ -143,6 +111,7 @@ haste.prototype.enterReadingMode = function(ret) {
   this.setTitle(ret.key);
   this.fullKey();
   this.$textarea.val('').hide();
+  this.$writeBar.hide();
 
   var mdCheck = (window.haste_markdown && this.doc && this.doc.data)
     ? window.haste_markdown.detect(this.doc.data)
@@ -154,7 +123,7 @@ haste.prototype.enterReadingMode = function(ret) {
   if (mdCheck.isMarkdown) {
     this.setReadSubMode('markdown');
   } else {
-    this.setReadSubMode('code');
+    this.setReadSubMode('plain');
   }
 };
 
@@ -162,7 +131,7 @@ haste.prototype.enterReadingMode = function(ret) {
 haste.prototype.toggleMarkdownView = function() {
   if (this.doc && this.doc.locked) {
     if (this.subMode === 'markdown') {
-      this.setReadSubMode('code');
+      this.setReadSubMode('plain');
     } else {
       this.setReadSubMode('markdown');
     }
@@ -175,59 +144,22 @@ haste.prototype.toggleMarkdownView = function() {
   }
 };
 
-// Bind mode bar buttons and live detection on textarea
-haste.prototype.configureModeBar = function() {
+// Bind Write/Preview toggle in Writing Mode only
+haste.prototype.configureWriteBar = function() {
   var _this = this;
 
-  this.$btnPrimary.click(function(evt) {
+  this.$btnWriteEdit.click(function(evt) {
     evt.preventDefault();
-    if (_this.doc && _this.doc.locked) {
-      _this.setReadSubMode('markdown');
-    } else {
+    if (!_this.doc || !_this.doc.locked) {
       _this.setWriteSubMode('write');
     }
   });
 
-  this.$btnSecondary.click(function(evt) {
+  this.$btnWritePreview.click(function(evt) {
     evt.preventDefault();
-    if (_this.doc && _this.doc.locked) {
-      _this.setReadSubMode('code');
-    } else {
+    if (!_this.doc || !_this.doc.locked) {
       _this.setWriteSubMode('preview');
     }
-  });
-
-  this.$btnCopyRaw.click(function(evt) {
-    evt.preventDefault();
-    if (!_this.doc || typeof _this.doc.data !== 'string') {
-      return;
-    }
-    var rawData = _this.doc.data;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(rawData).then(function() {
-        _this.$btnCopyRaw.text('Copied!');
-        setTimeout(function() {
-          _this.$btnCopyRaw.text('Copy Raw');
-        }, 1500);
-      });
-    } else {
-      var temp = document.createElement('textarea');
-      temp.value = rawData;
-      document.body.appendChild(temp);
-      temp.select();
-      try {
-        document.execCommand('copy');
-        _this.$btnCopyRaw.text('Copied!');
-        setTimeout(function() {
-          _this.$btnCopyRaw.text('Copy Raw');
-        }, 1500);
-      } catch (e) {}
-      document.body.removeChild(temp);
-    }
-  });
-
-  this.$textarea.on('input keyup paste', function() {
-    _this.updateWritingBadge();
   });
 };
 
@@ -265,7 +197,6 @@ haste.prototype.duplicateDocument = function() {
     var currentData = this.doc.data;
     this.newDocument();
     this.$textarea.val(currentData);
-    this.updateWritingBadge();
   }
 };
 
@@ -397,9 +328,9 @@ haste_document.prototype.load = function(key, callback, lang) {
       _this.locked = true;
       _this.key = key;
       _this.data = res.data;
-      var high = hljs.highlightAuto(res.data).value;
+      var escaped = _this.htmlEscape(res.data);
       callback({
-        value: high.replace(/.+/g, '<span class="line">$&</span>').replace(/^\s*[\r\n]/gm, '<span class="line"></span>\n'),
+        value: escaped.replace(/.+/g, '<span class="line">$&</span>').replace(/^\s*[\r\n]/gm, '<span class="line"></span>\n'),
         key: key
       });
     },
@@ -424,9 +355,9 @@ haste_document.prototype.save = function(data, callback) {
     success: function(res) {
       _this.locked = true;
       _this.key = res.key;
-      var high = hljs.highlightAuto(data).value;
+      var escaped = _this.htmlEscape(data);
       callback(null, {
-        value: high,
+        value: escaped,
         key: res.key
       });
     },

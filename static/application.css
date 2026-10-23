@@ -22,23 +22,25 @@ textarea{
 	font-size:1em;
 	height:100%;
 	outline:0;
-	padding:2.2em 0 4em;
+	padding:0;
 	resize:none;
-	width:100%;
-	box-sizing:border-box
+	width:100%
 }
 
 #code{
 	border:0;
+	color:#839496;
+	font-family:monospace;
 	font-size:1em;
 	margin:0;
 	outline:0;
-	padding:2.2em 0 4em;
+	padding:0 0 4em;
 	white-space:pre-wrap
 }
 
 #code code{
 	background:transparent!important;
+	color:#839496;
 	padding:0
 }
 #code::-webkit-input-placeholder::before {
@@ -161,124 +163,102 @@ pre .line::before{
 
 #tools .function.markdown{
 	background:none;
-	color:#2e5cb8;
+	color:#4c6a71;
 	font-family:monospace;
 	font-size:12px;
 	font-weight:700;
 	line-height:37px;
 	text-align:center;
-	width:38px;
-	opacity:0.45
+	width:36px;
+	opacity:0.5
 }
 #tools .function.markdown:after{
 	content:""
 }
 #tools .function.enabled.markdown{
-	color:#859900;
+	color:#839496;
 	opacity:1
 }
 #tools .function.enabled.markdown.active-view{
-	color:#0f0;
-	background:#002b36
+	color:#0f0
 }
 #tools .function.enabled.markdown:hover{
 	outline:#00FF00 dotted;
 	color:#0f0
 }
 
-/* Mode Bar (Writing Mode vs Reading Mode & View Switcher) */
-#mode-bar{
+/* Subtle Write / Preview toggle visible ONLY during Writing Mode */
+#write-bar{
 	position:fixed;
-	top:0.5em;
+	bottom:42px;
 	right:1em;
 	z-index:15;
-	background:#002b36;
-	border:1px solid #004400;
-	border-radius:3px;
-	padding:3px 6px;
+	background:#0a0a0a;
+	border:1px solid #222;
+	padding:2px;
 	font-family:monospace;
-	font-size:12px;
-	display:flex;
-	align-items:center;
-	gap:6px
+	font-size:12px
 }
 
-.mode-badge{
+.write-btn{
+	background:transparent;
+	border:0;
 	color:#586e75;
-	font-weight:700;
-	padding:2px 6px;
-	letter-spacing:0.5px
-}
-
-.mode-badge.md-detected{
-	color:#0f0
-}
-
-.mode-btn{
-	background:#073642;
-	border:1px solid #4c6a71;
-	border-radius:2px;
-	color:#839496;
 	cursor:pointer;
 	font-family:monospace;
 	font-size:12px;
 	padding:2px 8px
 }
 
-.mode-btn:hover{
-	border-color:#0f0;
-	color:#eee8d5
+.write-btn:hover{
+	color:#839496
 }
 
-.mode-btn.active{
-	background:#004400;
-	border-color:#0f0;
-	color:#0f0;
-	font-weight:700
+.write-btn.active{
+	background:#161616;
+	color:#0f0
 }
 
-/* Normalized Pastebin Markdown View */
+/* Pastebin Markdown View: Dark mode, gray text, zero colorful highlights */
 #markdown.markdown-body{
-	color:#93a1a1;
+	color:#839496;
 	font-family:monospace;
 	font-size:1em;
 	line-height:1.45;
 	margin:0;
 	outline:0;
-	padding:2.2em 0 5em;
+	padding:0 0 4em;
 	word-wrap:break-word
 }
 
-/* Normalized Header Scale: Clear hierarchy without oversized document titles */
+/* Normalized Header Scale: Gray tones, subtle hierarchy */
 #markdown .md-heading{
+	color:#b0b8b8;
 	font-weight:700;
 	line-height:1.25;
 	margin:0.75em 0 0.35em
 }
 
 #markdown .md-h1{
-	color:#eee8d5;
 	font-size:1.3em;
-	border-bottom:1px solid #073642;
+	border-bottom:1px solid #222;
 	padding-bottom:0.2em
 }
 
 #markdown .md-h2{
-	color:#eee8d5;
 	font-size:1.18em;
-	border-bottom:1px solid #073642;
+	border-bottom:1px solid #1a1a1a;
 	padding-bottom:0.15em
 }
 
 #markdown .md-h3{
-	color:#2aa198;
 	font-size:1.08em
 }
 
 #markdown .md-h4,
 #markdown .md-h5,
 #markdown .md-h6{
-	color:#b58900;
+	color:#93a1a1;
 	font-size:1em
 }
 
@@ -310,11 +290,11 @@ pre .line::before{
 }
 
 #markdown .md-blockquote{
-	border-left:3px solid #2aa198;
-	color:#839496;
-	background:#001b22;
+	border-left:2px solid #333;
+	color:#586e75;
+	background:transparent;
 	margin:0 0 0.65em;
-	padding:0.25em 0.8em
+	padding:0.15em 0.8em
 }
 
 #markdown .md-code-wrapper{
@@ -322,19 +302,14 @@ pre .line::before{
 }
 
 #markdown .md-code-lang{
-	background:#073642;
-	color:#586e75;
-	display:inline-block;
+	color:#4c6a71;
 	font-size:0.85em;
-	padding:1px 6px;
-	border-top-left-radius:3px;
-	border-top-right-radius:3px
+	padding:0 0 2px
 }
 
 #markdown pre.md-fenced{
-	background:#002b36;
-	border:1px solid #073642;
-	border-radius:3px;
+	background:#0c0c0c;
+	border:1px solid #1f1f1f;
 	color:#839496;
 	margin:0;
 	overflow-x:auto;
@@ -344,21 +319,21 @@ pre .line::before{
 
 #markdown code.md-code-block{
 	background:transparent;
+	color:#839496;
 	font-family:monospace;
 	padding:0
 }
 
 #markdown code.md-inline-code{
-	background:#073642;
-	border-radius:2px;
-	color:#2aa198;
+	background:transparent;
+	color:#9ea9a9;
 	font-family:monospace;
-	padding:0.1em 0.35em
+	padding:0
 }
 
 #markdown .md-hr{
 	border:0;
-	border-top:1px solid #073642;
+	border-top:1px solid #222;
 	margin:0.8em 0
 }
 
@@ -369,25 +344,25 @@ pre .line::before{
 
 #markdown table.md-table{
 	border-collapse:collapse;
-	border:1px solid #073642;
+	border:1px solid #222;
 	width:auto;
 	min-width:40%
 }
 
 #markdown table.md-table th,
 #markdown table.md-table td{
-	border:1px solid #073642;
+	border:1px solid #222;
 	padding:0.35em 0.7em
 }
 
 #markdown table.md-table th{
-	background:#073642;
-	color:#eee8d5;
+	background:#0f0f0f;
+	color:#9ea9a9;
 	font-weight:700
 }
 
 #markdown table.md-table tbody tr:nth-child(even){
-	background:#001b22
+	background:#070707
 }
 
 #markdown .md-align-left{
@@ -403,16 +378,16 @@ pre .line::before{
 }
 
 #markdown a.md-link{
-	color:#268bd2;
+	color:#839496;
 	text-decoration:underline
 }
 
 #markdown a.md-link:hover{
-	color:#2aa198
+	color:#b0b8b8
 }
 
 #markdown strong{
-	color:#eee8d5;
+	color:#9ea9a9;
 	font-weight:700
 }
 
@@ -423,47 +398,4 @@ pre .line::before{
 #markdown del{
 	color:#586e75;
 	text-decoration:line-through
-}
-
-.hljs{
-	display:block;
-	padding:.5em;
-	background:#002b36;
-	color:#839496
-}
-
-.diff .hljs-header,.hljs-comment,.hljs-doctype,.hljs-javadoc,.hljs-pi,.hljs-template_comment,.lisp .hljs-string{
-	color:#586e75
-}
-
-.css .hljs-tag,.hljs-addition,.hljs-keyword,.hljs-request,.hljs-status,.hljs-winutils,.method,.nginx .hljs-title{
-	color:#859900
-}
-
-.hljs-command,.hljs-hexcolor,.hljs-link_url,.hljs-number,.hljs-phpdoc,.hljs-regexp,.hljs-rules .hljs-value,.hljs-string,.hljs-tag .hljs-value,.tex .hljs-formula{
-	color:#2aa198
-}
-
-.css .hljs-function,.hljs-built_in,.hljs-chunk,.hljs-decorator,.hljs-id,.hljs-identifier,.hljs-localvars,.hljs-title,.vhdl .hljs-literal{
-	color:#268bd2
-}
-
-.haskell .hljs-type,.hljs-attribute,.hljs-class .hljs-title,.hljs-constant,.hljs-link_reference,.hljs-parent,.hljs-variable,.lisp .hljs-body,.smalltalk .hljs-number{
-	color:#b58900
-}
-
-.clojure .hljs-title,.css .hljs-pseudo,.diff .hljs-change,.hljs-attr_selector,.hljs-cdata,.hljs-header,.hljs-pragma,.hljs-preprocessor,.hljs-preprocessor .hljs-keyword,.hljs-shebang,.hljs-special,.hljs-subst,.hljs-symbol,.hljs-symbol .hljs-string{
-	color:#cb4b16
-}
-
-.hljs-deletion,.hljs-important{
-	color:#dc322f
-}
-
-.hljs-link_label{
-	color:#6c71c4
-}
-
-.tex .hljs-formula{
-	background:#073642
 }

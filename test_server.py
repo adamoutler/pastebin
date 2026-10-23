@@ -35,7 +35,8 @@ def test_homepage_and_security_headers():
     assert r.status_code == 200
     assert "<html" in r.text.lower()
     assert "markdown.min.js" in r.text
-    assert 'id="mode-bar"' in r.text
+    assert 'id="mode-bar"' not in r.text
+    assert 'id="write-bar"' in r.text
     assert 'id="markdown"' in r.text
     assert r.headers.get("X-Content-Type-Options") == "nosniff"
     assert r.headers.get("Referrer-Policy") == "no-referrer"
