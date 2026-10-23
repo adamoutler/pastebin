@@ -21,6 +21,7 @@
         <link rel="stylesheet" type="text/css" href="highlight.min.css"/>
 		
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="markdown.min.js"></script>
         <script src="application.min.js"></script>
         <script src="highlight.min.js"></script>
 
@@ -51,10 +52,18 @@
             <div class="duplicate function" title="Duplicate [Ctrl + D]"></div>
             <div class="raw function" title="Raw [Ctrl + Shift + R]"></div>
             <div class="twitter function" title="Tweet [Ctrl + Shift + T]"></div>
+            <div class="markdown function" title="Toggle Markdown View / Preview [Ctrl + Shift + M]">MD</div>
         </div>
         <div id="content">
+            <div id="mode-bar">
+                <span id="mode-label" class="mode-badge">WRITING MODE</span>
+                <button type="button" id="btn-mode-primary" class="mode-btn active">Write</button>
+                <button type="button" id="btn-mode-secondary" class="mode-btn">Preview</button>
+                <button type="button" id="btn-copy-raw" class="mode-btn" style="display:none;">Copy Raw</button>
+            </div>
+            <div id="markdown" class="markdown-body" style="display:none;" tabindex="0"></div>
             <pre id="code" style="display:none;" tabindex="0"><code></code></pre>
-            <textarea  placeholder="Paste here, press Ctrl-s, then copy the page URL" spellcheck="false" style="display:none;"></textarea>
+            <textarea placeholder="Paste here, press Ctrl-s, then copy the page URL" spellcheck="false" style="display:none;"></textarea>
         </div>
     </body>
   <script src="activate-power-mode.js"></script>
@@ -63,4 +72,3 @@
     document.body.addEventListener('input', POWERMODE);
 </script>
 </html>
-

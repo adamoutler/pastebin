@@ -95,6 +95,28 @@ var documentHandler = new DocumentHandler({
 // Set the server up with a static cache
 var app = connect();
 
+// Helper to escape HTML attribute values safely
+var escapeHtmlAttr = function(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+// Security headers middleware to enforce defense-in-depth and prevent script/resource injection
+app.use(function(request, response, next) {
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.setHeader('Referrer-Policy', 'no-referrer');
+  response.setHeader('X-Frame-Options', 'DENY');
+  response.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://ajax.googleapis.com http://ajax.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';"
+  );
+  next();
+});
+
 // Middleware to convert HEAD requests to GET so the router picks them up
 app.use(function(request, response, next) {
   if (request.method === 'HEAD') {
@@ -167,17 +189,18 @@ app.use(connectRoute(function(router) {
           } else {
             description = text.trim() || description;
           }
-          description = description.replace(/"/g, '&quot;');
         }
         
         var protocol = request.headers['x-forwarded-proto'] || 'http';
         var host = request.headers.host || 'pastebin.adamoutler.com';
-        var absoluteImageUrl = protocol + '://' + host + '/images/' + key + '.png';
-        var absolutePageUrl = protocol + '://' + host + '/' + key;
+        var safeKey = encodeURIComponent(key);
+        var absoluteImageUrl = escapeHtmlAttr(protocol + '://' + host + '/images/' + safeKey + '.png');
+        var absolutePageUrl = escapeHtmlAttr(protocol + '://' + host + '/' + safeKey);
+        var safeDescription = escapeHtmlAttr(description);
         
-        html = html.replace(/content="{{URL}}"/g, 'content="' + absolutePageUrl + '"');
-        html = html.replace(/content="codeicon\.png"/g, 'content="' + absoluteImageUrl + '"');
-        html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, 'content="' + description + '"');
+        html = html.replace(/content="\{\{URL\}\}"/g, function() { return 'content="' + absolutePageUrl + '"'; });
+        html = html.replace(/content="codeicon\.png"/g, function() { return 'content="' + absoluteImageUrl + '"'; });
+        html = html.replace(/content="You can modify and share this\. Just press CTRL-D"/g, function() { return 'content="' + safeDescription + '"'; });
         
         response.writeHead(200, { 'Content-Type': 'text/html' });
         if (request.method !== 'HEAD') {

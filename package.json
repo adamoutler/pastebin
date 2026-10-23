@@ -41,6 +41,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test_markdown_security.js"
   }
 }
