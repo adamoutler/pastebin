@@ -652,6 +652,12 @@
       if (ulMatch || olMatch) {
         var isOrdered = !!olMatch;
         var listEl = createSafeElement(isOrdered ? 'ol' : 'ul', isOrdered ? 'md-list md-ol' : 'md-list md-ul');
+        if (isOrdered) {
+          var startNum = parseInt(olMatch[2], 10);
+          if (startNum > 1) {
+            listEl.setAttribute('start', String(startNum));
+          }
+        }
         while (i < numLines) {
           var itemRaw = lines[i];
           var itemUl = itemRaw.match(/^( *)([-*+]) +(.*)$/);
